@@ -1,0 +1,43 @@
+name: CI
+
+# Runs on PRs and pushes to the default branch. We use `pull_request` (never
+# `pull_request_target`), so secrets are NOT exposed to pull requests from forks.
+on:
+  pull_request:
+  push:
+    branches: [main, master]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Unit tests
+        run: npm test
+      # Validates the built app against the Zapier platform schema; needs no Zapier login or secrets.
+      - name: Validate
+        run: npx zapier-platform validate
+      # The live lane calls a real FastComments server, so it only runs on pushes where secrets exist.
+      - name: Live API tests
+        if: ${{ github.event_name == 'push' }}
+        env:
+          CLIENT_ID: ${{ secrets.CLIENT_ID }}
+          CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
+          FC_ZAPIER_LIVE_BASE_URL: ${{ secrets.FC_ZAPIER_LIVE_BASE_URL }}
+          FC_ZAPIER_LIVE_REFRESH_TOKEN: ${{ secrets.FC_ZAPIER_LIVE_REFRESH_TOKEN }}
+        run: npm run test:live

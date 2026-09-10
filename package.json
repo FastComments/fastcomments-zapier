@@ -1,0 +1,39 @@
+{
+  "name": "fastcomments-zapier",
+  "version": "1.0.0",
+  "description": "FastComments integration for Zapier",
+  "type": "module",
+  "exports": "./dist/index.js",
+  "private": true,
+  "license": "MIT",
+  "homepage": "https://fastcomments.com/zapier",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/FastComments/fastcomments-zapier.git"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "clean": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true});require('node:fs').rmSync('build',{recursive:true,force:true})\"",
+    "build": "npm run clean && tsc",
+    "_zapier-build": "npm run build",
+    "lint": "eslint src && node scripts/check-text.js",
+    "test": "npm run build && node --test \"dist/__tests__/**/*.test.js\"",
+    "test:live": "npm run build && node --test \"dist/__tests__/live/*.test.js\"",
+    "validate": "zapier-platform validate",
+    "push": "zapier-platform push"
+  },
+  "dependencies": {
+    "zapier-platform-core": "19.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.2",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "eslint": "^9.35.0",
+    "nock": "^14.0.17",
+    "typescript": "5.6.2",
+    "zapier-platform-cli": "19.1.0"
+  }
+}
