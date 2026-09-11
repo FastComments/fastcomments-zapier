@@ -1,6 +1,7 @@
 import type { ApiEnvelope } from './api.js';
 
 // Mirrors WebhookComment in the FastComments server (util/sync-utils.ts): the exact object a webhook delivers.
+// Every key is always present; the server sends null, false or [] when the comment has no value.
 export type CommentUserMention = {
   id: string;
   tag: string;
@@ -13,32 +14,32 @@ export type WebhookComment = {
   id: string;
   urlId: string;
   url: string | null;
-  userId?: string | null;
-  commenterEmail?: string | null;
+  userId: string | null;
+  commenterEmail: string | null;
   commenterName: string;
   comment: string;
   commentHTML: string;
-  externalId?: string;
-  parentId?: string | null;
+  externalId: string | null;
+  parentId: string | null;
   date: string;
   votes: number;
   votesUp: number;
   votesDown: number;
   verified: boolean;
-  verifiedDate?: string;
-  reviewed?: boolean;
-  avatarSrc?: string | null;
-  isSpam?: boolean;
-  aiDeterminedSpam?: boolean;
-  hasImages?: boolean;
-  pageNumber?: number | null;
-  pageNumberOF?: number | null;
-  pageNumberNF?: number | null;
+  verifiedDate: string | null;
+  reviewed: boolean;
+  avatarSrc: string | null;
+  isSpam: boolean;
+  aiDeterminedSpam: boolean;
+  hasImages: boolean;
+  pageNumber: number | null;
+  pageNumberOF: number | null;
+  pageNumberNF: number | null;
   approved: boolean;
   locale: string | null;
-  mentions?: CommentUserMention[];
-  domain?: string | null;
-  moderationGroupIds?: string[] | null;
+  mentions: CommentUserMention[];
+  domain: string | null;
+  moderationGroupIds: string[];
 };
 
 export type SamplePayloadsResponse = ApiEnvelope & { payloads: WebhookComment[] };
