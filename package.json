@@ -1,6 +1,6 @@
 {
   "name": "fastcomments-zapier",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "FastComments integration for Zapier",
   "type": "module",
   "exports": "./dist/index.js",

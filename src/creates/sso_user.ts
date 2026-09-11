@@ -3,12 +3,12 @@ import type { Bundle, ZObject } from 'zapier-platform-core';
 import { SSO_USER_OUTPUT_FIELDS, SSO_USER_SAMPLE } from '../samples/sso_user.js';
 import type { ApiSSOUserOutput, SSOUserResponse } from '../types/api.js';
 import { normalizeSSOUser } from '../utils/normalize.js';
-import { apiPost } from '../utils/request.js';
+import { apiPatch, apiPostUnlessExists } from '../utils/request.js';
 
 // Admin flags (isAdminAdmin, isCommentModeratorAdmin, isAccountOwner) are left out on purpose: a Zap must not be
 // able to escalate privileges.
 const inputFields = defineInputFields([
-  { key: 'id', label: 'User ID', type: 'string', required: true, helpText: 'Your own id for the user. Creating the same id twice fails.' },
+  { key: 'id', label: 'User ID', type: 'string', required: true, helpText: 'Your own id for the user. If a user with this id already exists, it is updated instead.' },
   { key: 'username', label: 'Username', type: 'string', required: true },
   { key: 'email', label: 'Email', type: 'string', required: true },
   { key: 'display_name', label: 'Display Name', type: 'string', required: false },
@@ -35,8 +35,7 @@ type InputData = {
 
 export const perform = async (z: ZObject, bundle: Bundle<InputData>): Promise<ApiSSOUserOutput> => {
   const input = bundle.inputData;
-  const data = await apiPost<SSOUserResponse>(z, bundle, '/api/v1/sso-users', {
-    id: input.id,
+  const fields = {
     username: input.username,
     email: input.email,
     displayName: input.display_name,
@@ -46,9 +45,12 @@ export const perform = async (z: ZObject, bundle: Bundle<InputData>): Promise<Ap
     groupIds: input.group_ids,
     optedInNotifications: input.opted_in_notifications,
     isProfileActivityPrivate: input.is_profile_activity_private,
-  });
+  };
+  // A Zap that runs repeatedly for the same person must not fail on the second run, so an existing id is updated.
+  const created = await apiPostUnlessExists<SSOUserResponse>(z, bundle, '/api/v1/sso-users', { id: input.id, ...fields }, ['user-exists']);
+  const data = created ?? await apiPatch<SSOUserResponse>(z, bundle, `/api/v1/sso-users/${encodeURIComponent(input.id)}`, fields);
   if (!data.user) {
-    throw new z.errors.Error('FastComments did not return the created user.', 'empty-response', 500);
+    throw new z.errors.Error('FastComments did not return the user.', 'empty-response', 500);
   }
   return normalizeSSOUser(data.user);
 };
@@ -57,8 +59,8 @@ export default defineCreate({
   key: 'create_sso_user',
   noun: 'SSO User',
   display: {
-    label: 'Create SSO User',
-    description: 'Creates a single sign-on user so they can comment under your own identity system.',
+    label: 'Create or Update SSO User',
+    description: 'Creates a single sign-on user, or updates the existing user with the same id.',
   },
   operation: {
     inputFields,

@@ -11,16 +11,17 @@ source of the official FastComments integration on Zapier, built with the Zapier
 | Trigger | `updated_comment` | Updated Comment | REST hook. Edits, approvals, votes, moderation changes. |
 | Trigger | `deleted_comment` | Deleted Comment | REST hook. |
 | Create | `create_comment` | Create Comment | `POST /api/v1/comments` |
-| Create | `create_page` | Create Page | `POST /api/v1/pages` |
-| Create | `create_sso_user` | Create SSO User | `POST /api/v1/sso-users`, admin flags intentionally excluded |
-| Create | `create_feed_post` | Create Feed Post | `POST /api/v1/feed-posts` |
-| Create | `create_hash_tag` | Create Hash Tag | `POST /api/v1/hash-tags` |
+| Create | `create_page` | Create or Update Page | `POST /api/v1/pages`, `PATCH` when the URL ID exists |
+| Create | `create_sso_user` | Create or Update SSO User | `POST /api/v1/sso-users`, `PATCH` when the id exists; admin flags intentionally excluded |
+| Create | `create_feed_post` | Create Feed Post | `POST /api/v1/feed-posts`, author required |
+| Create | `create_hash_tag` | Create or Update Hash Tag | `POST /api/v1/hash-tags`, `PATCH` when the tag exists |
 | Create | `flag_comment` | Flag Comment | `POST /api/v1/comments/{id}/flag` |
 | Search | `find_comment` | Find Comment | by id |
 | Search | `find_sso_user` | Find SSO User | by email |
 | Search | `find_page` | Find Page | by URL ID |
 
-Every trigger takes an optional domain filter fed by the account's configured domains.
+Every trigger takes an optional domain filter fed by the account's configured domains. Find SSO User and Find
+Page are paired with their creates, so the editor offers "create if it doesn't exist" on both.
 
 ## How it connects
 

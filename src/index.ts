@@ -41,4 +41,25 @@ export default defineApp({
     [findSSOUser.key]: findSSOUser,
     [findPage.key]: findPage,
   },
+  // Pairing a search with its create is what gives the editor the "create if it doesn't exist" toggle.
+  searchOrCreates: {
+    [findSSOUser.key]: {
+      key: findSSOUser.key,
+      display: {
+        label: 'Find or Create SSO User',
+        description: 'Finds a single sign-on user by email, creating the user when there is none.',
+      },
+      search: findSSOUser.key,
+      create: createSSOUser.key,
+    },
+    [findPage.key]: {
+      key: findPage.key,
+      display: {
+        label: 'Find or Create Page',
+        description: 'Finds a page by URL ID, creating the page when there is none.',
+      },
+      search: findPage.key,
+      create: createPage.key,
+    },
+  },
 });
