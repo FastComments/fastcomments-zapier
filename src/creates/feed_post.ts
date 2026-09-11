@@ -7,8 +7,9 @@ import { apiPost } from '../utils/request.js';
 
 const inputFields = defineInputFields([
   { key: 'content_html', label: 'Content (HTML)', type: 'text', required: true },
+  // Optional in the schema only because Zapier forbids turning a field required for existing Zaps (C006); perform enforces it.
+  { key: 'from_user_id', label: 'Author User ID', type: 'string', required: false, helpText: 'Required. A FastComments or SSO user id; every feed post has an author.' },
   { key: 'title', label: 'Title', type: 'string', required: false },
-  { key: 'from_user_id', label: 'Author User ID', type: 'string', required: false },
   { key: 'from_user_display_name', label: 'Author Display Name', type: 'string', required: false },
   { key: 'tags', label: 'Tags', type: 'string', required: false, list: true },
   { key: 'link_url', label: 'Link URL', type: 'string', required: false, helpText: 'Attach one link preview to the post.' },
@@ -20,8 +21,8 @@ const inputFields = defineInputFields([
 
 type InputData = {
   content_html: string;
-  title?: string;
   from_user_id?: string;
+  title?: string;
   from_user_display_name?: string;
   tags?: string[];
   link_url?: string;
@@ -33,6 +34,9 @@ type InputData = {
 
 export const perform = async (z: ZObject, bundle: Bundle<InputData>): Promise<WithId<FeedPost>> => {
   const input = bundle.inputData;
+  if (!input.from_user_id) {
+    throw new z.errors.Error('Author User ID is required: every feed post has an author.', 'missing-from-user-id', 422);
+  }
   const links = input.link_url ? [{ url: input.link_url, title: input.link_title, description: input.link_description }] : undefined;
   const data = await apiPost<FeedPostResponse>(z, bundle, '/api/v1/feed-posts', {
     contentHTML: input.content_html,
